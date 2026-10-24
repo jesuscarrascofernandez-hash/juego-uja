@@ -1,0 +1,380 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Defeat Angel War · Juega en el navegador</title>
+  <meta name="description" content="Defeat Angel War: autobattler roguelike 2D hecho con Unity. Elige cartas, activa sinergias y derrota a los jefes. Juega gratis en el navegador.">
+  <meta name="theme-color" content="#5ab5e5">
+  <link rel="icon" type="image/png" sizes="32x32" href="img/favicon-32.png">
+  <link rel="apple-touch-icon" href="img/icono-192.png">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Defeat Angel War">
+  <meta property="og:description" content="Autobattler roguelike 2D. Juega gratis en el navegador.">
+  <meta property="og:image" content="https://jesuscarrascofernandez-hash.github.io/juego-uja/img/portada.jpg">
+  <meta property="og:url" content="https://jesuscarrascofernandez-hash.github.io/juego-uja/">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --cielo: #5ab5e5;
+      --tierra: #776e6c;
+      --oro: #f2c14e;
+      --oro-claro: #ffe08a;
+      --oro-oscuro: #c98f24;
+      --madera: #3a2205;
+      --tinta: #16131f;
+      --papel: #fff8e7;
+      --barra: 44px;
+      --pixel: "Press Start 2P", ui-monospace, monospace;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; height: 100%; }
+    body {
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--papel);
+      background: var(--tierra);
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+    [hidden] { display: none !important; }
+
+    /* ── Escena de fondo: la misma que el menú del juego ───────────────── */
+    .escena { position: fixed; inset: 0; overflow: hidden; background: var(--cielo); transition: filter .6s ease; }
+    .capa {
+      position: absolute; inset: 0;
+      background-repeat: repeat-x;
+      background-size: auto 100%;
+      background-position: center bottom;
+      image-rendering: pixelated;
+    }
+    .cielo  { background-image: url(img/cielo.png); }
+    .lejos  { background-image: url(img/montanas-lejos.png); }
+    .cerca  { background-image: url(img/montanas.png); }
+    .nube {
+      position: absolute; left: 0;
+      image-rendering: pixelated;
+      animation: deriva linear infinite;
+      will-change: transform;
+    }
+    /* Escala de los sprites = alto de pantalla / 640 px (tamaño original del fondo) */
+    .n1 { width: calc(147 / 640 * 100vh); top: 9%;  animation-duration: 140s; animation-delay: -30s; }
+    .n2 { width: calc(46  / 640 * 100vh); top: 6%;  animation-duration: 190s; animation-delay: -120s; }
+    .n3 { width: calc(100 / 640 * 100vh); top: 17%; animation-duration: 160s; animation-delay: -75s; }
+    .n4 { width: calc(55  / 640 * 100vh); top: 24%; animation-duration: 210s; animation-delay: -10s; }
+    @keyframes deriva { from { transform: translateX(-30vw); } to { transform: translateX(110vw); } }
+    @media (prefers-reduced-motion: reduce) { .nube { animation: none; transform: translateX(30vw); } }
+
+    /* ── Portada ───────────────────────────────────────────────────────── */
+    .portada {
+      position: relative; z-index: 1;
+      height: 100%;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: clamp(14px, 2.6vh, 26px);
+      padding: 24px 16px 72px;
+      text-align: center;
+    }
+    .titulo {
+      margin: 0;
+      font-family: var(--pixel);
+      font-weight: 400;
+      font-size: clamp(26px, 6.2vw, 76px);
+      line-height: 1.25;
+      letter-spacing: .02em;
+      color: var(--papel);
+      /* contorno "pixel" y sombra proporcionales al tamaño de letra */
+      text-shadow:
+        .055em 0 0 var(--tinta), -.055em 0 0 var(--tinta), 0 .055em 0 var(--tinta), 0 -.055em 0 var(--tinta),
+        .055em .055em 0 var(--tinta), -.055em .055em 0 var(--tinta), .055em -.055em 0 var(--tinta), -.055em -.055em 0 var(--tinta),
+        0 .14em 0 #0005;
+    }
+    .titulo .oro { color: var(--oro); }
+    .subtitulo {
+      margin: 0;
+      font-family: var(--pixel);
+      font-size: clamp(10px, 1.3vw, 14px);
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--tinta);
+      background: var(--papel);
+      padding: 8px 12px;
+      box-shadow: 0 0 0 3px var(--tinta), 0 6px 0 3px #0005;
+    }
+    .boton {
+      font-family: var(--pixel);
+      font-size: clamp(16px, 2.2vw, 24px);
+      letter-spacing: .06em;
+      color: var(--madera);
+      background: var(--oro);
+      border: 0;
+      padding: 20px 44px 18px;
+      cursor: pointer;
+      box-shadow:
+        inset -5px -5px 0 var(--oro-oscuro), inset 5px 5px 0 var(--oro-claro),
+        0 0 0 5px var(--madera), 0 10px 0 5px #0006;
+      transition: transform .08s ease, filter .15s ease;
+      margin-top: 6px;
+    }
+    .boton:hover { filter: brightness(1.07); transform: translateY(-2px); }
+    .boton:active {
+      transform: translateY(4px);
+      box-shadow:
+        inset 5px 5px 0 var(--oro-oscuro), inset -5px -5px 0 var(--oro-claro),
+        0 0 0 5px var(--madera), 0 4px 0 5px #0006;
+    }
+    .boton:focus-visible, .boton-peq:focus-visible, summary:focus-visible, a:focus-visible {
+      outline: 3px solid var(--papel); outline-offset: 6px;
+    }
+    .nota { margin: 4px 0 0; font-size: 13px; color: var(--papel); text-shadow: 0 2px 0 #0008; }
+    .panel {
+      width: min(560px, 100%);
+      text-align: left;
+      background: rgba(22, 19, 31, .86);
+      box-shadow: 0 0 0 3px var(--tinta), 0 0 0 6px #ffffff22, 0 10px 0 6px #0004;
+      padding: 0;
+    }
+    .panel summary {
+      cursor: pointer;
+      list-style: none;
+      padding: 14px 18px;
+      font-family: var(--pixel);
+      font-size: 11px;
+      letter-spacing: .06em;
+      color: var(--oro);
+      user-select: none;
+    }
+    .panel summary::-webkit-details-marker { display: none; }
+    .panel summary::before { content: "▸ "; }
+    .panel[open] summary::before { content: "▾ "; }
+    .panel ul { margin: 0; padding: 0 22px 4px 38px; line-height: 1.6; font-size: 15px; }
+    .panel li::marker { color: var(--oro); }
+    .teclas { font-size: 13px; color: #d9d2c4; }
+    .panel .teclas { padding: 6px 18px 16px; margin: 0; }
+    kbd {
+      font-family: var(--pixel);
+      font-size: 9px;
+      color: var(--tinta);
+      background: var(--papel);
+      padding: 4px 6px 3px;
+      box-shadow: 0 0 0 2px var(--tinta), 0 3px 0 2px #0006;
+      margin: 0 3px;
+      white-space: nowrap;
+    }
+    .aviso-movil { margin: 0; font-size: 13px; background: #16131fcc; padding: 8px 12px; }
+
+    .creditos {
+      position: fixed; z-index: 1; left: 0; right: 0; bottom: 0;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      text-align: center;
+      font-size: 12px;
+      line-height: 1.5;
+      color: #efe8da;
+      text-shadow: 0 1px 0 #000a;
+      background: linear-gradient(transparent, #0000004d);
+    }
+    .creditos a { color: var(--oro-claro); }
+
+    /* ── Juego ─────────────────────────────────────────────────────────── */
+    body.jugando .escena { filter: brightness(.22) saturate(.6); }
+    body.jugando .creditos { display: none; }
+    .juego {
+      position: fixed; inset: 0; z-index: 2;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 10px;
+    }
+    .marco, .barra-inferior {
+      width: min(100%, calc((100vh - var(--barra) - 28px) * 16 / 9));
+      width: min(100%, calc((100dvh - var(--barra) - 28px) * 16 / 9));
+    }
+    .marco {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      background: #000;
+      box-shadow: 0 0 0 4px var(--tinta), 0 0 0 7px #f2c14e40, 0 24px 60px #000c;
+    }
+    #unity-canvas { display: block; width: 100%; height: 100%; background: #000; outline: none; }
+    .carga {
+      position: absolute; inset: 0;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px;
+      background: #0d0b14;
+    }
+    .carga img { width: clamp(72px, 12vw, 128px); image-rendering: auto; filter: drop-shadow(0 6px 0 #0008); }
+    .carga-texto { margin: 0; font-family: var(--pixel); font-size: clamp(10px, 1.4vw, 14px); color: var(--papel); }
+    .barra { width: min(440px, 70%); height: 22px; padding: 3px; background: var(--tinta); box-shadow: 0 0 0 4px var(--oro); }
+    .relleno {
+      height: 100%; width: 0;
+      background: repeating-linear-gradient(90deg, var(--oro) 0 12px, var(--oro-oscuro) 12px 16px);
+      transition: width .25s ease;
+    }
+    .carga-consejo { margin: 0; font-size: 13px; color: #b9b1a3; text-align: center; padding: 0 16px; }
+    .barra-inferior {
+      height: var(--barra);
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding-top: 10px;
+    }
+    .boton-peq {
+      font-family: var(--pixel);
+      font-size: 10px;
+      color: var(--madera);
+      background: var(--oro);
+      border: 0;
+      padding: 9px 12px 8px;
+      cursor: pointer;
+      box-shadow: inset -3px -3px 0 var(--oro-oscuro), inset 3px 3px 0 var(--oro-claro), 0 0 0 3px var(--madera);
+      white-space: nowrap;
+    }
+    .boton-peq:active { transform: translateY(2px); }
+
+    .error {
+      position: fixed; z-index: 10; left: 50%; top: 16px; transform: translateX(-50%);
+      width: min(640px, calc(100% - 32px));
+      background: #7a1d1d; color: #fff; padding: 14px 18px;
+      box-shadow: 0 0 0 3px #2a0707, 0 8px 0 3px #0006;
+      font-size: 14px; line-height: 1.5;
+    }
+
+    @media (max-width: 640px) {
+      .barra-inferior .teclas { display: none; }
+      .barra-inferior { justify-content: flex-end; }
+      .panel ul { font-size: 14px; }
+    }
+    @media (max-height: 520px) {
+      .panel { display: none; }
+      .portada { padding-bottom: 48px; }
+    }
+  </style>
+</head>
+<body>
+  <!-- Escena de fondo: las capas del menú principal del juego -->
+  <div class="escena" aria-hidden="true">
+    <div class="capa cielo"></div>
+    <img class="nube n1" src="img/nube2.png" alt="">
+    <img class="nube n2" src="img/nube1.png" alt="">
+    <img class="nube n3" src="img/nube5.png" alt="">
+    <img class="nube n4" src="img/nube3.png" alt="">
+    <div class="capa lejos"></div>
+    <div class="capa cerca"></div>
+  </div>
+
+  <main id="portada" class="portada">
+    <h1 class="titulo">Defeat<br><span class="oro">Angel War</span></h1>
+    <p class="subtitulo">Autobattler roguelike 2D</p>
+    <button id="btn-jugar" class="boton" type="button">Jugar</button>
+    <p class="nota">Activa el sonido · la primera carga tarda un poco, después queda guardada</p>
+    <details class="panel">
+      <summary>Cómo se juega</summary>
+      <ul>
+        <li>Tu héroe combate <strong>solo</strong>: tú decides entre combate y combate.</li>
+        <li>Tras cada victoria eliges <strong>1 de 3 cartas</strong> para mejorarlo.</li>
+        <li>Junta ciertas cartas para activar <strong>sinergias</strong>.</li>
+        <li>3 niveles de 5 combates, con mini jefe y jefe final.</li>
+        <li>Si mueres, vuelves a empezar desde cero.</li>
+      </ul>
+      <p class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo</p>
+    </details>
+    <p class="aviso-movil" id="aviso-movil" hidden>Está pensado para ordenador: en móvil puede ir lento.</p>
+  </main>
+
+  <section id="juego" class="juego" hidden aria-label="Juego">
+    <div class="marco">
+      <canvas id="unity-canvas" tabindex="-1"></canvas>
+      <div class="carga" id="carga">
+        <img src="img/icono-192.png" alt="">
+        <p class="carga-texto" id="carga-texto">Cargando 0%</p>
+        <div class="barra"><div class="relleno" id="relleno"></div></div>
+        <p class="carga-consejo">La primera vez descarga el juego completo. Las siguientes cargará casi al instante.</p>
+      </div>
+    </div>
+    <div class="barra-inferior">
+      <span class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo</span>
+      <button id="btn-pantalla" class="boton-peq" type="button">Pantalla completa</button>
+    </div>
+  </section>
+
+  <div id="error" class="error" role="alert" hidden></div>
+
+  <footer class="creditos">
+    Realizado por Alberto Castaño Mercader, Uriel Martínez Martínez y Jesús Carrasco Fernández
+    · <a href="https://github.com/jesuscarrascofernandez-hash/juego-uja">Código y créditos</a>
+  </footer>
+
+  <script>
+    (function () {
+      // Archivos generados por Unity (Build/juego-uja.*). Gzip + "Decompression Fallback":
+      // GitHub Pages no envía Content-Encoding, así que el propio loader los descomprime.
+      var CARPETA = "Build";
+      var NOMBRE = "juego-uja";
+      var config = {
+        dataUrl: CARPETA + "/" + NOMBRE + ".data.unityweb",
+        frameworkUrl: CARPETA + "/" + NOMBRE + ".framework.js.unityweb",
+        codeUrl: CARPETA + "/" + NOMBRE + ".wasm.unityweb",
+        streamingAssetsUrl: "StreamingAssets",
+        companyName: "DefaultCompany",
+        productName: "ProyectoUJA",
+        productVersion: "1.0",
+        devicePixelRatio: Math.min(window.devicePixelRatio || 1, 2),
+        showBanner: function (mensaje, tipo) {
+          if (tipo === "error") mostrarError(mensaje); else console.warn(mensaje);
+        }
+      };
+
+      function $(id) { return document.getElementById(id); }
+
+      function mostrarError(mensaje) {
+        var caja = $("error");
+        caja.textContent = mensaje;
+        caja.hidden = false;
+      }
+
+      function soportaWebGL2() {
+        try { return !!document.createElement("canvas").getContext("webgl2"); }
+        catch (e) { return false; }
+      }
+
+      if (/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)) $("aviso-movil").hidden = false;
+
+      var instancia = null;
+      var iniciado = false;
+
+      $("btn-jugar").addEventListener("click", function () {
+        if (iniciado) return;
+        if (!soportaWebGL2()) {
+          mostrarError("Tu navegador no soporta WebGL 2. Prueba con una versión reciente de Chrome, Edge, Firefox o Safari.");
+          return;
+        }
+        iniciado = true;
+        // El clic del usuario desbloquea el audio y la reproducción de vídeo del navegador.
+        document.body.classList.add("jugando");
+        $("portada").hidden = true;
+        $("juego").hidden = false;
+
+        var script = document.createElement("script");
+        script.src = CARPETA + "/" + NOMBRE + ".loader.js";
+        script.onload = function () {
+          createUnityInstance($("unity-canvas"), config, function (progreso) {
+            var pct = Math.round(progreso * 100);
+            $("relleno").style.width = pct + "%";
+            $("carga-texto").textContent = pct < 100 ? "Cargando " + pct + "%" : "Iniciando…";
+          }).then(function (u) {
+            instancia = u;
+            $("carga").hidden = true;
+            $("unity-canvas").focus();
+          }).catch(function (mensaje) {
+            mostrarError("No se pudo iniciar el juego: " + mensaje);
+          });
+        };
+        script.onerror = function () {
+          mostrarError("No se pudo descargar el juego. Revisa la conexión y recarga la página.");
+        };
+        document.body.appendChild(script);
+      });
+
+      $("btn-pantalla").addEventListener("click", function () {
+        if (instancia) instancia.SetFullscreen(1);
+      });
+    })();
+  </script>
+</body>
+</html>
