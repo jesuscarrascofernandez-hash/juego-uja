@@ -181,6 +181,7 @@
     body.jugando .creditos { display: none; }
     .juego {
       position: fixed; inset: 0; z-index: 2;
+      -webkit-user-select: none; user-select: none; /* Ctrl+A en un campo del juego no selecciona la página */
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 10px;
     }
@@ -269,10 +270,12 @@
         <li>Tu héroe combate <strong>solo</strong>: tú decides entre combate y combate.</li>
         <li>Tras cada victoria eliges <strong>1 de 3 cartas</strong> para mejorarlo.</li>
         <li>Junta ciertas cartas para activar <strong>sinergias</strong>.</li>
-        <li>3 niveles de 5 combates, con mini jefe y jefe final.</li>
+        <li>3 fases de 6 combates (con mini jefe y jefe) y un jefe final.</li>
         <li>Si mueres, vuelves a empezar desde cero.</li>
+        <li>Botones <strong>x1 · x2 · x4</strong> (arriba a la derecha) para acelerar los combates.</li>
+        <li><strong>MODO DEV</strong>: cambia stats, date cualquier carta, salta a cualquier combate o jefe y desbloquea los Recuerdos.</li>
       </ul>
-      <p class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo</p>
+      <p class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo · <kbd>Ctrl+F9</kbd> modo dev</p>
     </details>
     <p class="aviso-movil" id="aviso-movil" hidden>Está pensado para ordenador: en móvil puede ir lento.</p>
   </main>
@@ -288,7 +291,7 @@
       </div>
     </div>
     <div class="barra-inferior">
-      <span class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo</span>
+      <span class="teclas"><kbd>Clic</kbd> elegir carta · <kbd>Esc</kbd> pausa · saltar vídeo · <kbd>Ctrl+F9</kbd> modo dev</span>
       <button id="btn-pantalla" class="boton-peq" type="button">Pantalla completa</button>
     </div>
   </section>

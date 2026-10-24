@@ -4,12 +4,24 @@
 
 ▶️ **Jugar:** https://jesuscarrascofernandez-hash.github.io/juego-uja/
 
-Tu héroe combate solo: tú decides entre combate y combate. Tras cada victoria eliges una de tres cartas para mejorarlo, combinas cartas para activar sinergias y avanzas por 3 niveles de 5 combates (con mini jefe y jefe final). Si mueres, empiezas de cero.
+Tu héroe combate solo: tú decides entre combate y combate. Tras cada victoria eliges una de tres cartas para mejorarlo, combinas cartas para activar sinergias y avanzas por 3 fases de 6 combates (con mini jefe y jefe) hasta el jefe final. Si mueres, empiezas de cero.
 
 | Control | Acción |
 |---|---|
 | Clic | Elegir carta / botones |
 | Esc | Pausa · saltar vídeo |
+| x1 · x2 · x4 | Velocidad de los combates (arriba a la derecha; se recuerda) |
+| MODO DEV · Ctrl+F9 | Modo desarrollador |
+
+### Modo desarrollador
+
+Botón **MODO DEV** (o <kbd>Ctrl</kbd>+<kbd>F9</kbd>). Pausa el juego mientras está abierto y tiene cinco pestañas:
+
+- **Jugador**: vida, ataque, defensa, velocidad de ataque, crítico, esquiva, daño crítico y vidas extra; curar o matar al héroe.
+- **Enemigo**: stats del enemigo del combate en curso; curarlo o matarlo al instante.
+- **Cartas**: darte cualquier carta Normal o Héroe, completar sinergias y cambiar la probabilidad de cartas Héroe.
+- **Combates**: saltar a cualquier combate o jefe de cualquier fase y elegir velocidad (x0.5 a x8).
+- **Recuerdos**: desbloquear o reiniciar la colección del menú.
 
 Funciona en las versiones actuales de Chrome, Edge, Firefox y Safari (necesita WebGL 2). Está pensado para ordenador.
 
